@@ -2,11 +2,14 @@
 
 The popup UI shows the short name "Gmail Theme Sync". Keep the manifest `name` unchanged: it is the Chrome Web Store listing name.
 
-A Manifest V3 browser extension (Chrome now, Safari next) that inverts Gmail's colours to follow the system theme, or forces Light or Dark. It is plain JS with no build step and no dependencies.
+A Manifest V3 browser extension for Chrome and Safari that inverts Gmail's colours to follow the system theme, or forces Light or Dark. It is plain JS with no build step and no dependencies. The extension files live at the repo root, and `safari/` holds the Xcode wrapper app for the Mac App Store.
+
+Keep `privacy-policy.md` at the repo root. Its GitHub URL is registered with the App Store.
 
 ## Commands
 
-- `zip -r gmail-theme-sync.zip manifest.json contentScript.js popup.html popup.js images` builds the store upload for both the Chrome Web Store and App Store Connect. Never zip the repo root: that would ship `docs/`, `test/` and the README.
+- `zip -r gmail-theme-sync.zip manifest.json contentScript.js popup.html popup.js images` builds the Chrome Web Store upload. Never zip the repo root: that would ship `docs/`, `test/`, `safari/` and the README.
+- `safari/sync.sh` copies the extension into the Safari project. Run it before every Safari build. See [Safari packaging](.claude/rules/safari-packaging.md) for archiving and uploading.
 
 ## Rules
 

@@ -8,6 +8,8 @@ Decisions:
 - **macOS only to start.** The inversion CSS was tuned on desktop Gmail. iOS mobile Gmail web uses a different DOM, so iOS waits until there is demand for it.
 - **Package with the App Store Connect web packager.** Apple turns an uploaded zip into a signed wrapper app. The local `xcrun` packager is the fallback.
 
+**Outcome (November 2026):** the web packager rejected the zip, so v1.2.1 shipped through the fallback. The Xcode project is now committed in `safari/`; see `.claude/rules/safari-packaging.md` for the build and upload steps.
+
 ## Why the code is already Safari-friendly
 
 The background service worker was removed. The popup now writes `chrome.storage.sync`, and the content script reacts to `storage.onChanged`. Service workers are the least reliable part of Safari web extensions (for example, you cannot open a debug window for them), so there is nothing left there to go wrong.
@@ -55,7 +57,7 @@ xcrun safari-web-extension-packager . --macos-only --no-open --swift \
   --project-location ../gmail-theme-sync-safari
 ```
 
-The project stays outside this repo. By default it references the extension files rather than copying them, so changes here flow straight into it. Archive and upload it from Xcode.
+This was the original fallback plan. The project now lives in `safari/`, and `safari/sync.sh` copies the extension files into it, so you no longer need to regenerate it.
 
 Two problems turned up when this was tried with Xcode 27.2:
 
