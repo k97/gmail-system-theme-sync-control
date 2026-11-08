@@ -69,13 +69,12 @@
     }
 
     /* Pause Button */
+    /* Tonal button: same fill as the toggle track, same size and radius as the logo */
     .pause-btn {
-      width: 36px;
-      height: 36px;
-      /* Optical alignment: the glyph lines up with the padding edge, the hit area stays 36px */
-      margin: -8px -8px -8px 0;
+      width: 32px;
+      height: 32px;
       padding: 0;
-      background: none;
+      background: #f1f3f4;
       border: none;
       border-radius: var(--radius-inner);
       display: flex;
@@ -88,7 +87,7 @@
     }
 
     .pause-btn:hover {
-      background: #f1f3f4;
+      background: #e8eaed;
     }
 
     .pause-btn.paused {
@@ -277,10 +276,11 @@
 
       .pause-btn {
         color: #9aa0a6;
+        background: #18191a;
       }
 
       .pause-btn:hover {
-        background: #18191a;
+        background: #2d3034;
       }
 
       .pause-btn.paused {

@@ -1,10 +1,10 @@
-# Privacy Policy for Gmail Theme Sync
+# Privacy Policy for Gmail Theme Sync & Control
 
 Last Updated: 8 November 2026
 
 ## Overview
 
-Gmail Theme Sync is a browser extension that enhances your Gmail experience by automatically syncing the interface theme with your system preferences. This privacy policy explains how we handle your data and what information we collect.
+Gmail Theme Sync & Control is a browser extension that enhances your Gmail experience by automatically syncing the interface theme with your system preferences. This privacy policy explains how we handle your data and what information we collect.
 
 ## Data Collection
 
