@@ -5,19 +5,19 @@
 
 // DOM Elements
 const elements = {
+    segmentControl: document.getElementById('segmentControl'),
     segmentOptions: document.querySelectorAll('.segment-option'),
     pauseBtn: document.getElementById('pauseBtn'),
     iconPlay: document.querySelector('#pauseBtn .icon-play'),
     iconPause: document.querySelector('#pauseBtn .icon-pause'),
     tooltip: document.querySelector('#pauseBtn .tooltip'),
     themeControl: document.getElementById('themeControl'),
-    themeLabel: document.querySelector('.theme-label')
+    version: document.getElementById('version')
 };
 
 // State
 const state = {
-    isPaused: false,
-    currentTheme: 'system'
+    isPaused: false
 };
 
 /**
@@ -25,7 +25,7 @@ const state = {
  */
 function updatePauseUI() {
     const {isPaused} = state;
-    const {pauseBtn, iconPlay, iconPause, tooltip, themeControl, themeLabel} = elements;
+    const {pauseBtn, iconPlay, iconPause, tooltip, themeControl, segmentOptions} = elements;
 
     // Update pause button state
     pauseBtn.classList.toggle('paused', isPaused);
@@ -34,12 +34,9 @@ function updatePauseUI() {
     tooltip.textContent = isPaused ? 'Resume extension' : 'Pause extension';
     pauseBtn.setAttribute('aria-label', isPaused ? 'Resume extension' : 'Pause extension');
 
-    // Update theme controls visibility
-    const displayStyle = isPaused ? 'none' : '';
-    themeControl.style.display = displayStyle;
-    if (themeLabel) {
-        themeLabel.style.display = displayStyle;
-    }
+    // Dim and disable theme controls while paused
+    themeControl.classList.toggle('paused', isPaused);
+    segmentOptions.forEach(option => { option.disabled = isPaused; });
 }
 
 /**
@@ -47,20 +44,11 @@ function updatePauseUI() {
  * @param {string} theme - The theme to set ('system', 'light', or 'dark')
  */
 function setActiveTheme(theme) {
-    state.currentTheme = theme;
-    elements.segmentOptions.forEach(option => {
-        option.classList.toggle('active', option.dataset.theme === theme);
-    });
-}
-
-/**
- * Sends a message to content scripts about theme changes
- * @param {string} theme - The theme to apply
- */
-function notifyThemeChange(theme) {
-    chrome.runtime.sendMessage({
-        action: 'themeChanged',
-        theme
+    elements.segmentOptions.forEach((option, index) => {
+        const isActive = option.dataset.theme === theme;
+        option.classList.toggle('active', isActive);
+        option.setAttribute('aria-pressed', isActive);
+        if (isActive) elements.segmentControl.style.setProperty('--index', index);
     });
 }
 
@@ -70,26 +58,13 @@ function notifyThemeChange(theme) {
 function handlePauseStateChange() {
     state.isPaused = !state.isPaused;
 
-    // Save state
+    // Save state; Gmail tabs pick it up via storage.onChanged
     chrome.storage.sync.set({
         themePaused: state.isPaused
     });
 
     // Update UI
     updatePauseUI();
-
-    // Notify content scripts
-    chrome.runtime.sendMessage({
-        action: 'themePauseState',
-        paused: state.isPaused
-    });
-
-    // Handle theme based on pause state
-    if (state.isPaused) {
-        notifyThemeChange('default');
-    } else {
-        notifyThemeChange(state.currentTheme);
-    }
 }
 
 /**
@@ -103,26 +78,18 @@ function handleThemeSelection(selectedTheme) {
     chrome.storage.sync.set({
         themePreference: selectedTheme
     });
-    notifyThemeChange(selectedTheme);
 }
 
 // Initialize extension state
 chrome.storage.sync.get(['themePreference', 'themePaused'], (result) => {
     state.isPaused = !!result.themePaused;
-    state.currentTheme = result.themePreference || 'system';
 
     updatePauseUI();
-    setActiveTheme(state.currentTheme);
-
-    // Notify content scripts of initial state
-    chrome.runtime.sendMessage({
-        action: 'themePauseState',
-        paused: state.isPaused
-    });
-
-    // Apply appropriate theme
-    notifyThemeChange(state.isPaused ? 'default' : state.currentTheme);
+    setActiveTheme(result.themePreference || 'system');
+    requestAnimationFrame(() => elements.segmentControl.classList.add('animate'));
 });
+
+elements.version.textContent = `v${chrome.runtime.getManifest().version}`;
 
 // Event Listeners
 elements.pauseBtn.addEventListener('click', handlePauseStateChange);
