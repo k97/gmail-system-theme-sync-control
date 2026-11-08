@@ -4,36 +4,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gmail Theme Sync & Control</title>
+  <title>Gmail Theme Sync</title>
   <style>
-    /* Base Styles */
-    body {
-      width: 380px;
-      margin: 0;
-      padding: 10px;
-      font-family: 'Google Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background: #f7f8fa;
-      color: #222;
-      box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* Two radii keep corners consistent: inner = outer - the 4px track padding */
+    :root {
+      --radius-outer: 12px;
+      --radius-inner: 8px;
     }
 
-    /* Card Container */
-    .card {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 24px;
-      box-shadow: 0 2px 16px rgba(60, 64, 67, 0.10);
-      padding: 32px 28px 24px 28px;
-      width: 95%;
-      max-width: 400px;
-      min-width: 320px;
-      min-height: 300px;
+    /* Base Styles */
+    /* The browser popup frame is the only wrapper: one even padding inside it */
+    body {
+      width: 360px;
+      margin: 0;
+      padding: 20px;
+      font-family: 'Google Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: #fff;
+      color: #222;
+      box-sizing: border-box;
+    }
+
+    /* Vertical rhythm: 20px between sections, 16px between the related description and toggle */
+    .card,
+    main {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      position: relative;
+      gap: 20px;
+    }
+
+    main {
+      gap: 16px;
     }
 
     /* Header Section */
@@ -50,66 +50,61 @@
     .logo-title {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .icon {
       width: 32px;
       height: 32px;
-      border-radius: 8px;
+      border-radius: var(--radius-inner);
     }
 
     .title {
       font-size: 1.02rem;
       font-weight: 500;
-      color: #54585D;
+      color: #202124;
       margin: 0;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.01em;
       line-height: 1.2;
     }
 
     /* Pause Button */
     .pause-btn {
-      width: 44px;
-      height: 44px;
-      background: #f7f8fa;
-      border: 2px solid #bdbdbd;
-      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      /* Optical alignment: the glyph lines up with the padding edge, the hit area stays 36px */
+      margin: -8px -8px -8px 0;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: var(--radius-inner);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: border 0.2s, background 0.2s;
-      outline: none;
+      color: #5f6368;
+      transition: background 0.2s, color 0.2s, transform 0.1s ease-out;
       position: relative;
-      box-shadow: 0 1px 4px rgba(60, 64, 67, 0.06);
+    }
+
+    .pause-btn:hover {
+      background: #f1f3f4;
+    }
+
+    .pause-btn.paused {
+      color: #1e8e3e;
+    }
+
+    .pause-btn:focus-visible {
+      outline: 2px solid #1a73e8;
+      outline-offset: 1px;
     }
 
     .pause-btn svg {
-      width: 28px;
-      height: 28px;
+      width: 18px;
+      height: 18px;
       display: block;
-    }
-
-    /* Pause Button Icons */
-    .pause-btn .icon-pause circle {
-      stroke: #bdbdbd;
-      stroke-width: 2;
-      fill: #fff;
-    }
-
-    .pause-btn .icon-pause rect {
-      fill: #bdbdbd;
-    }
-
-    .pause-btn .icon-play circle {
-      stroke: #43d854;
-      stroke-width: 2;
-      fill: #fff;
-    }
-
-    .pause-btn .icon-play polygon {
-      fill: #43d854;
+      fill: currentColor;
     }
 
     /* Tooltip */
@@ -119,13 +114,12 @@
       background: #333;
       color: #fff;
       text-align: center;
-      border-radius: 4px;
+      border-radius: var(--radius-inner);
       padding: 4px 8px;
       position: absolute;
       z-index: 10;
-      top: 48px;
-      right: 50%;
-      transform: translateX(50%);
+      top: calc(100% + 6px);
+      right: 0;
       font-size: 13px;
       pointer-events: none;
       transition: opacity 0.2s;
@@ -139,106 +133,117 @@
 
     /* Description */
     .description {
-      margin: 24px 0 30px;
+      margin: 0;
       font-size: 0.96rem;
       color: #6d6d6d;
       text-align: center;
       font-weight: 400;
       line-height: 1.5;
-      max-width: 97%;
+      text-wrap: balance;
     }
 
     /* Theme Control Section */
-    .theme-label {
-      font-size: 0.9rem;
-      color: #888;
-      font-weight: 400;
-      margin: 0 0 8px 0;
-      text-align: center;
-      letter-spacing: 0.01em;
-    }
-
     .theme-control {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      margin: 0;
+      transition: opacity 0.2s;
     }
 
-    /* Segment Control */
+    .theme-control.paused {
+      opacity: 0.4;
+    }
+
+    /* Segment Control: the indicator slides under the active option (--index is set in popup.js) */
     .segment-control {
-      display: flex;
-      background: #f4f6fa;
-      border-radius: 20px;
-      border: 3px solid #f0f1f3;
-      box-shadow: 0 2px 8px rgba(60, 64, 67, 0.06);
-      padding: 8px;
-      width: 250px;
-      max-width: 90%;
-      margin: 0 auto;
-      gap: 0;
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 4px;
+      box-sizing: border-box;
+      background: #f1f3f4;
+      border-radius: var(--radius-outer);
+    }
+
+    .segment-indicator {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc((100% - 8px) / 3);
+      background: #fff;
+      border-radius: var(--radius-inner);
+      box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
+      transform: translateX(calc(var(--index, 0) * 100%));
+    }
+
+    /* Transition is enabled after the first render, so the saved theme does not slide in on open */
+    .segment-control.animate .segment-indicator {
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .segment-option {
-      flex: 1 1 0;
-      padding: 12px 0;
-      cursor: pointer;
-      border-radius: 14px;
-      font-size: 1.0rem;
-      font-family: inherit;
-      font-weight: 400;
-      min-width: 0;
-      text-align: center;
-      white-space: nowrap;
-      transition: all 0.18s;
-      color: #222;
+      position: relative;
+      padding: 11px 0;
+      font: inherit;
+      font-size: 0.9rem;
+      color: #5f6368;
       background: none;
       border: none;
-      outline: none;
-      margin: 0 2px;
-      letter-spacing: 0.01em;
+      border-radius: var(--radius-inner);
+      cursor: pointer;
+      transition: color 0.2s, transform 0.1s ease-out;
+    }
+
+    /* Press feedback fires on pointer-down, not on release */
+    .segment-option:active:not(:disabled),
+    .pause-btn:active {
+      transform: scale(0.96);
+    }
+
+    .segment-option:disabled {
+      cursor: default;
     }
 
     .segment-option.active {
-      background: #fff;
-      color: #1a73e8;
-      box-shadow: 0 1px 4px rgba(60, 64, 67, 0.08);
+      color: #202124;
+      font-weight: 500;
+    }
+
+    .segment-option:focus-visible {
+      outline: 2px solid #1a73e8;
+      outline-offset: 1px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .segment-control.animate .segment-indicator {
+        transition: none;
+      }
     }
 
     /* Footer */
     .footer {
-      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       font-size: 13px;
       color: #aaa;
       text-align: center;
       font-weight: 400;
       letter-spacing: 0.01em;
-      font-family: 'SF Mono', 'Roboto Mono', 'Courier New', monospace;
     }
 
-    /* Responsive Design */
-    @media (max-width: 400px) {
-      .card {
-        min-width: 0;
-        padding: 16px 2vw;
-      }
+    .hint {
+      margin: 0;
+      color: #80868b;
+    }
 
-      .segment-control {
-        width: 98%;
-      }
+    .version {
+      font-family: 'SF Mono', 'Roboto Mono', 'Courier New', monospace;
     }
 
     /* Dark Mode */
     @media (prefers-color-scheme: dark) {
       body {
-        background: #18191a;
-        color: #e8eaed;
-      }
-
-      .card {
         background: #23272b;
-        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
+        color: #e8eaed;
       }
 
       .title {
@@ -249,56 +254,49 @@
         color: #b0b0b0;
       }
 
-      .theme-label {
-        color: #b0b0b0;
-      }
-
-      .theme-control {
-        background: none;
-      }
-
       .segment-control {
-        background: #404245;
-        border-color: #23272b;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        background: #18191a;
+      }
+
+      .segment-indicator {
+        background: #3c4043;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
       }
 
       .segment-option {
-        color: #e8eaed;
-        background: none;
+        color: #9aa0a6;
       }
 
       .segment-option.active {
-        background: #18191a;
-        color: #8ab4f8;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+        color: #e8eaed;
+      }
+
+      .segment-option:focus-visible {
+        outline-color: #8ab4f8;
       }
 
       .pause-btn {
-        background: #23272b;
-        border-color: #444;
+        color: #9aa0a6;
       }
 
-      .pause-btn .icon-pause circle {
-        stroke: #444;
-        fill: #23272b;
+      .pause-btn:hover {
+        background: #18191a;
       }
 
-      .pause-btn .icon-pause rect {
-        fill: #444;
+      .pause-btn.paused {
+        color: #81c995;
       }
 
-      .pause-btn .icon-play circle {
-        stroke: #43d854;
-        fill: #23272b;
-      }
-
-      .pause-btn .icon-play polygon {
-        fill: #43d854;
+      .pause-btn:focus-visible {
+        outline-color: #8ab4f8;
       }
 
       .footer {
-        color: #b0b0b0;
+        color: #80868b;
+      }
+
+      .hint {
+        color: #9aa0a6;
       }
     }
   </style>
@@ -308,23 +306,21 @@
   <div class="card">
     <header class="top-row">
       <div class="logo-title">
-        <img src="images/icon128.png" alt="Gmail Theme Sync and Control Icon" class="icon">
-        <h1 class="title">Gmail Theme Sync & Control</h1>
+        <img src="images/icon128.png" alt="Gmail Theme Sync icon" class="icon">
+        <h1 class="title">Gmail Theme Sync</h1>
       </div>
       <button class="pause-btn" id="pauseBtn" aria-label="Pause extension">
         <!-- Pause Icon (default) -->
         <span class="icon-pause">
-          <svg viewBox="0 0 40 40" fill="none">
-            <circle cx="20" cy="20" r="18" />
-            <rect x="14" y="12" width="4" height="16" rx="2" />
-            <rect x="22" y="12" width="4" height="16" rx="2" />
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <rect x="5" y="4" width="3" height="12" rx="1.5" />
+            <rect x="12" y="4" width="3" height="12" rx="1.5" />
           </svg>
         </span>
         <!-- Play Icon (hidden by default) -->
         <span class="icon-play" style="display:none;">
-          <svg viewBox="0 0 40 40" fill="none">
-            <circle cx="20" cy="20" r="18" />
-            <polygon points="16,13 28,20 16,27" />
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M6.5 4.2v11.6a1 1 0 0 0 1.5.86l9.3-5.8a1 1 0 0 0 0-1.72L8 3.34a1 1 0 0 0-1.5.86z" />
           </svg>
         </span>
         <span class="tooltip">Pause extension</span>
@@ -333,22 +329,22 @@
 
     <main>
       <p class="description">
-        Automatically syncs with your system theme by default, or choose Light or Dark mode.
-        Provides a comfortable email experience that matches your preferences.
+        Matches Gmail to your system theme, or pick Light or Dark.
       </p>
 
       <div class="theme-control" id="themeControl">
-        <h2 class="theme-label">Select Theme</h2>
-        <div class="segment-control">
-          <button class="segment-option active" data-theme="system">System</button>
-          <button class="segment-option" data-theme="light">Light</button>
-          <button class="segment-option" data-theme="dark">Dark</button>
+        <div class="segment-control" id="segmentControl" role="group" aria-label="Theme">
+          <span class="segment-indicator" aria-hidden="true"></span>
+          <button class="segment-option active" data-theme="system" aria-pressed="true">System</button>
+          <button class="segment-option" data-theme="light" aria-pressed="false">Light</button>
+          <button class="segment-option" data-theme="dark" aria-pressed="false">Dark</button>
         </div>
       </div>
     </main>
 
     <footer class="footer">
-      v1.1.0
+      <p class="hint">Works best with Gmail's default theme.</p>
+      <span class="version" id="version"></span>
     </footer>
   </div>
 

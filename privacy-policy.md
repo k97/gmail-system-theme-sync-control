@@ -1,10 +1,10 @@
-# Privacy Policy for Gmail Theme Sync & Control
+# Privacy Policy for Gmail Theme Sync
 
-Last Updated: 14 May 2025
+Last Updated: 8 November 2026
 
 ## Overview
 
-Gmail Theme Sync & Control is a Chrome extension that enhances your Gmail experience by automatically syncing the interface theme with your system preferences. This privacy policy explains how we handle your data and what information we collect.
+Gmail Theme Sync is a browser extension that enhances your Gmail experience by automatically syncing the interface theme with your system preferences. This privacy policy explains how we handle your data and what information we collect.
 
 ## Data Collection
 
@@ -19,10 +19,8 @@ We are committed to protecting your privacy. This extension:
 
 The extension requires the following permissions to function:
 
-1. `activeTab`: Required to modify the Gmail interface theme
-2. `scripting`: Required to inject theme-related styles
-3. `storage`: Used to store your theme preferences locally
-4. `https://mail.google.com/*`: Required to access and modify Gmail's interface
+1. `storage`: Used to store your theme preferences locally
+2. `https://mail.google.com/*`: Required to access and modify Gmail's interface
 
 ## Data Storage
 
@@ -31,7 +29,7 @@ The extension only stores:
 - Your theme preference (light/dark/system)
 - Your pause/resume state
 
-This information is stored locally in your browser using Chrome's storage API and is never transmitted to any external servers.
+This information is stored using your browser's extension storage API. If you are signed in to browser sync, your browser may sync it across your own devices. It is never sent to the developer or any third-party server.
 
 ## Third-Party Services
 
