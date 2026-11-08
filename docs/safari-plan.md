@@ -67,10 +67,10 @@ Two problems turned up when this was tried with Xcode 27.2:
 - The packager's only manifest warning was `incognito`. That key has been removed: with no background page, `"split"` did nothing in Chrome. `minimum_chrome_version` is not flagged.
 - The packager generated the macOS app icon set from the manifest `icons`. Its 512@2x icon is 1024px, so `images/icon1024.png` covers the App Store icon.
 - The generated macOS app builds, with ad-hoc signing, once the bundle ID fix above is applied.
+- The step 1 checks pass in Safari as a temporary extension, tested by the owner on 2026-11-08 with v1.2.1. `storage.sync` keeps the settings across a Safari restart.
 
 ## Still open
 
-- Run the behaviour checks in step 1 in a real Safari.
 - Once Safari ships, add a Safari line to Browser Compatibility in the README.
 
 ## Sources
